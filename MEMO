@@ -1,3 +1,4 @@
+*Data setup
 
 - Download language.csv files from WALS http://wals.info/
 
@@ -22,6 +23,31 @@
   - Notes:
     - Language isolates are put directly under ROOT
     - Intermediate nodes that have only one child are removed
+    - An intermediate node is created if multiple languages share the same ISO code
     - Languages labeled as "Deaf sign language", "Mixed language" or others are removed
 
   % perl format/format.pl ../data/langlist.out ../data/language.modified.csv ../data/classifications ../data/tree.json ../data/features.json ../data/walstree.json
+
+- Remove low-frequency features
+
+  % python format/fthres.py --fcovthres=0.1 --feature2=../data/features2.json ../data/tree.json ../data/features.json ../data/langs_all.json ../data/fidmap
+
+- Remove low-coverage languages
+
+  % python format/lthres.py --lcovthres=0.3 ../data/langs_all.json ../data/langs.json
+
+
+*Missing value imputation
+
+  % python mv/json2table.py ../data/features2.json ../data/langs.json ../data/langs.tsv
+  % R --vanilla -f mv/impute_mca.r --args ../data/langs.tsv ../data/langs.filled.tsv
+  % python mv/table2json.py ../data/langs.filled.tsv ../data/langs.filled.json
+
+  % python mv/json2table.py ../data/features2.json ../data/langs_all.json ../data/langs_all.tsv
+  % R --vanilla -f mv/impute_mca.r --args ../data/langs_all.tsv ../data/langs_all.filled.tsv
+  % python mv/table2json.py ../data/langs_all.filled.tsv ../data/langs_all.filled.json
+
+
+**Evaluating missing value imputation by cross-validation
+
+  $ make -j 8 -f mv/cv/autoeval.make all CV=10
