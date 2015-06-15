@@ -1,0 +1,27 @@
+
+- Download language.csv files from WALS http://wals.info/
+
+- Manually modify language.csv to obtain language.modified.csv
+
+  % perl format/langlist.pl < ../data/language.modified.csv > ../data/langlist.out 2> ../data/langlist.err
+
+- Download Ethnologue pages using WALS's ISO codes
+
+  % cd data/ethnologue
+  % perl -anle '{if (! -f $F[0]){ printf "http://www.ethnologue.com/language/%s\n", $F[0]; }}' < ../langlist.out | wget -i - -w 60
+
+- Extract classifications from Ethnologue pages
+
+  % for f in ???; do echo -e "$f\t"`cat $f | perl -nle'if(/<div class=\"field-label\">Classification<\/div>/){$flag=1;}if($flag and /\">([^<]+)<\/a>/) { print $1; exit }'`; done > ../classifications
+
+- Create JSON files
+  - tree.json: Ethnologue tree
+  - walstree.json: two-level WALS tree
+  - features.json: WALS features
+
+  - Notes:
+    - Language isolates are put directly under ROOT
+    - Intermediate nodes that have only one child are removed
+    - Languages labeled as "Deaf sign language", "Mixed language" or others are removed
+
+  % perl format/format.pl ../data/langlist.out ../data/language.modified.csv ../data/classifications ../data/tree.json ../data/features.json ../data/walstree.json
