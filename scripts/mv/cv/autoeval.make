@@ -26,13 +26,13 @@ $(1).cv$(2).json : $(LANGS_FILE) $(LANGS_CVMAP_FILE)
 HIDE_LIST += $(1).cv$(2).json
 
 $(1).cv$(2).tsv : $(1).cv$(2).json
-	python mv/json2table.py $(FEATURE_FILE) $(1).cv$(2).json $(1).cv$(2).tsv
+	python mv/json2tsv.py $(FEATURE_FILE) $(1).cv$(2).json $(1).cv$(2).tsv
 
 $(1).cv$(2).filled.tsv : $(1).cv$(2).tsv
 	R --vanilla -f mv/impute_mca.r --args $(1).cv$(2).tsv $(1).cv$(2).filled.tsv
 
 $(1).cv$(2).filled.json : $(1).cv$(2).filled.tsv
-	python mv/table2json.py $(1).cv$(2).filled.tsv $(1).cv$(2).filled.json
+	python mv/tsv2json.py $(1).cv$(2).filled.tsv $(1).cv$(2).filled.json
 
 FILLED_LIST += $(1).cv$(2).filled.json
 endef
