@@ -18,7 +18,7 @@ $(LANGS_CVMAP_FILE) : $(LANGS_FILE)
 	python mv/cv/make_cvmap.py $(SEED) $(LANGS_FILE) $(LANGS_CVMAP_FILE) $(CV)
 
 
-# cv_split MODEL_PREFIX CV_IDX
+# cv_split FILE_PREFIX CV_IDX
 define cv_main
 $(1).cv$(2).json : $(LANGS_FILE) $(LANGS_CVMAP_FILE)
 	python mv/cv/hide.py $(LANGS_FILE) $(1).cv$(2).json $(LANGS_CVMAP_FILE) $(2)
