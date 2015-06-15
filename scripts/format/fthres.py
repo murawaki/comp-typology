@@ -65,7 +65,7 @@ def main():
     fid2struct = load_json_file(args[1])
     # output
     langfile = args[2]
-    fidmapfile = args[3]
+    fidmappath = args[3]
 
     leaf_list = []
     queue = [(tree, None)]
@@ -79,7 +79,8 @@ def main():
 
     if options.fcovthres > 0.0:
         fid2struct, fidmap = shrink_features(leaf_list, fid2struct, options.fcovthres)
-        np.save(fidmapfile, fidmap)
+        with codecs.getwriter("utf-8")(open(fidmappath, 'w')) as f:
+            f.write(json.dumps(fidmap.tolist()))
 
     if options.feature2 is not None:
         with codecs.getwriter("utf-8")(open(options.feature2, 'w')) as f:
