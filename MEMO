@@ -1,8 +1,17 @@
+*Requirements
+
+- Python2
+  - numpy
+- Perl (for preprocessing)
+- R (for missing data imputation)
+  - missMDA
+
+
 *Data setup
 
-- Download language.csv files from WALS http://wals.info/
+- Download language.csv from WALS http://wals.info/
 
-- Manually modify language.csv to obtain language.modified.csv
+- Manually modify language.csv to obtain language.modified.csv, and
 
   % perl format/langlist.pl < ../data/language.modified.csv > ../data/langlist.out 2> ../data/langlist.err
 
@@ -37,17 +46,21 @@
   % python format/lthres.py --lcovthres=0.3 ../data/langs_all.json ../data/langs.json
 
 
-*Missing value imputation
+*Missing data imputation
+
+- For the PARTIAL dataset:
 
   % python mv/json2table.py ../data/features2.json ../data/langs.json ../data/langs.tsv
   % R --vanilla -f mv/impute_mca.r --args ../data/langs.tsv ../data/langs.filled.tsv
   % python mv/table2json.py ../data/langs.filled.tsv ../data/langs.filled.json
+
+- For the FULL dataset:
 
   % python mv/json2table.py ../data/features2.json ../data/langs_all.json ../data/langs_all.tsv
   % R --vanilla -f mv/impute_mca.r --args ../data/langs_all.tsv ../data/langs_all.filled.tsv
   % python mv/table2json.py ../data/langs_all.filled.tsv ../data/langs_all.filled.json
 
 
-**Evaluating missing value imputation by cross-validation
+**Evaluating missing data imputation by cross-validation
 
-  $ make -j 8 -f mv/cv/autoeval.make all CV=10
+  % make -j 8 -f mv/cv/autoeval.make all CV=10
