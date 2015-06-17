@@ -4,7 +4,7 @@ import sys, os
 import codecs
 import numpy as np
 import json
-from optparse import OptionParser
+from argparse import ArgumentParser
 
 sys.path.insert(1, os.path.join(sys.path[0], os.path.pardir))
 from json_utils import load_json_file
@@ -54,18 +54,23 @@ def shrink_features(leaf_list, fid2struct, fcovthres):
 def main():
     sys.stderr = codecs.getwriter("utf-8")(sys.stderr)
 
-    parser = OptionParser()
-    parser.add_option("--fcovthres", dest="fcovthres", metavar="FLOAT", type="float", default=0.0,
-                      help="eliminate features with higher rate of missing values [0,1]")
-    parser.add_option("--feature2", dest="feature2", metavar="FILE", default=None)
-    (options, args) = parser.parse_args()
+    parser = ArgumentParser()
+    parser.add_argument("--fcovthres", dest="fcovthres", metavar="FLOAT", type=float, default=0.0,
+                        help="eliminate features with higher rate of missing values [0,1]")
+    parser.add_argument("--feature2", dest="feature2", metavar="FILE", default=None,
+                        help="save post-thresholding feature list")
+    parser.add_argument("tree", metavar="TREE", default=None)
+    parser.add_argument("fid2struct", metavar="FID2STRUCT", default=None)
+    parser.add_argument("lang", metavar="LANG", default=None)
+    parser.add_argument("fidmap", metavar="FIDMAP", default=None)
+    args = parser.parse_args()
 
     # input
-    tree = load_json_file(args[0])
-    fid2struct = load_json_file(args[1])
+    tree = load_json_file(args.tree)
+    fid2struct = load_json_file(args.fid2struct)
     # output
-    langfile = args[2]
-    fidmappath = args[3]
+    langfile = args.lang
+    fidmappath = args.fidmap
 
     leaf_list = []
     queue = [(tree, None)]
@@ -77,13 +82,13 @@ def main():
         else:
             leaf_list.append(node)
 
-    if options.fcovthres > 0.0:
-        fid2struct, fidmap = shrink_features(leaf_list, fid2struct, options.fcovthres)
+    if args.fcovthres > 0.0:
+        fid2struct, fidmap = shrink_features(leaf_list, fid2struct, args.fcovthres)
         with codecs.getwriter("utf-8")(open(fidmappath, 'w')) as f:
             f.write(json.dumps(fidmap.tolist()))
 
-    if options.feature2 is not None:
-        with codecs.getwriter("utf-8")(open(options.feature2, 'w')) as f:
+    if args.feature2 is not None:
+        with codecs.getwriter("utf-8")(open(args.feature2, 'w')) as f:
             f.write(json.dumps(fid2struct))
 
     train_total = 0

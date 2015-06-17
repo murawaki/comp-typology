@@ -4,23 +4,26 @@ import sys, os
 import codecs
 import json
 import random
-from optparse import OptionParser
+from argparse import ArgumentParser
 
 sys.path.insert(1, os.path.join(os.path.join(sys.path[0], os.path.pardir), os.path.pardir))
 from json_utils import load_json_file
 
 
 def main():
-    parser = OptionParser()
-    parser.add_option("-s", "--seed", dest="seed", metavar="INT", type="int", default=None,
-                      help="random seed")
-    (options, args) = parser.parse_args()
+    parser = ArgumentParser()
+    parser.add_argument("-s", "--seed", dest="seed", metavar="INT", type=int, default=None,
+                        help="random seed")
+    parser.add_argument("src", metavar="SOURCE", default=None)
+    parser.add_argument("dst", metavar="DESTINATION", default=None)
+    parser.add_argument("cvn", metavar="INT", default=None)
+    args = parser.parse_args()
 
-    if options.seed is not None:
-        random.seed(options.seed)
+    if args.seed is not None:
+        random.seed(args.seed)
 
-    src, dst = args[0], args[1]
-    cvn = int(args[2])
+    src, dst = args.src, args.dst
+    cvn = int(args.cvn)
     langlist = load_json_file(src)
 
     filled_list = []

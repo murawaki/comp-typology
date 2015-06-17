@@ -6,7 +6,7 @@ import json
 import numpy as np
 import random 
 from collections import defaultdict
-from optparse import OptionParser
+from argparse import ArgumentParser
 
 sys.path.insert(1, os.path.join(os.path.join(sys.path[0], os.path.pardir), os.path.pardir))
 from json_utils import load_json_file
@@ -59,27 +59,30 @@ def eval_random(fid2struct, langlist):
 
 
 def main():
-    parser = OptionParser()
-    parser.add_option("-s", "--seed", dest="seed", metavar="INT", type="int", default=None,
-                      help="random seed")
-    parser.add_option("--random", dest="random", action="store_true", default=False)
-    parser.add_option("--freq", dest="most_frequent", action="store_true", default=False)
-    (options, args) = parser.parse_args()
+    parser = ArgumentParser()
+    parser.add_argument("-s", "--seed", dest="seed", metavar="INT", type=int, default=None,
+                        help="random seed")
+    parser.add_argument("--random", dest="random", action="store_true", default=False)
+    parser.add_argument("--freq", dest="most_frequent", action="store_true", default=False)
+    parser.add_argument("langs", metavar="LANGS", default=None)
+    parser.add_argument("f1", metavar="DUMMY_OR_LANGS_FILLED_OR_LANGS_HIDDEN", default=None)
+    parser.add_argument("f2", metavar="FID2STRUCT_OR_DUMMY_OR_LANGS_HIDDEN", default=None)
+    args = parser.parse_args()
 
-    if options.seed is not None:
-        np.random.seed(options.seed)
-        random.seed(options.seed)
+    if args.seed is not None:
+        np.random.seed(args.seed)
+        random.seed(args.seed)
 
-    langlist = load_json_file(args[0])
-    if options.random:
-        fid2struct = load_json_file(args[2])
+    langlist = load_json_file(args.langs)
+    if args.random:
+        fid2struct = load_json_file(args.f2)
         total, correct = eval_random(fid2struct, langlist)
-    elif options.most_frequent:
-        hidelist = load_json_file(args[1])
+    elif args.most_frequent:
+        hidelist = load_json_file(args.f1)
         total, correct = eval_most_frequent(hidelist, langlist)
     else:
-        filledlist = load_json_file(args[1])
-        hidelist = load_json_file(args[2])
+        filledlist = load_json_file(args.f1)
+        hidelist = load_json_file(args.f2)
         total, correct = eval_mv(filledlist, hidelist, langlist)
     sys.stdout.write("%f\t%d\t%d\n" % (float(correct) / total, correct, total))
 

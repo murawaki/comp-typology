@@ -3,7 +3,7 @@
 # usage make -f THIS_FILE CV=10
 #
 LANGS_FILE := ../data/langs.json
-FEATURE_FILE := ../data/features2.json
+FEATURE_FILE := ../data/features.json
 OUTDIR := ../data/cv
 LANGS_CVMAP_FILE := $(OUTDIR)/langs.cvmap.json
 
