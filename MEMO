@@ -30,7 +30,7 @@
 - Manually modify language.csv to obtain language.modified.csv, and
 
   % cd scripts
-  % perl format/langlist.pl < ../data/language.modified.csv > ../data/langlist.out 2> ../data/langlist.err
+  % perl format_wals/langlist.pl < ../data/language.modified.csv > ../data/langlist.out 2> ../data/langlist.err
 
 - Download Ethnologue pages using WALS's ISO codes
 
@@ -49,15 +49,15 @@
     - Languages labeled as "Deaf sign language", "Mixed language" or others are removed
 
   % cd scripts
-  % perl format/format.pl ../data/langlist.out ../data/language.modified.csv ../data/classifications ../data/tree.json ../data/features_all.json ../data/walstree.json
+  % perl format_wals/format.pl ../data/langlist.out ../data/language.modified.csv ../data/classifications ../data/tree.json ../data/features_all.json ../data/walstree.json
 
 - Remove low-frequency features
 
-  % python format/fthres.py --fcovthres=0.1 --feature2=../data/features.json ../data/tree.json ../data/features_all.json ../data/langs_all.json ../data/fidmap.json
+  % python format_wals/fthres.py --fcovthres=0.1 --feature2=../data/features.json ../data/tree.json ../data/features_all.json ../data/langs_all.json ../data/fidmap.json
 
 - Remove low-coverage languages
 
-  % python format/lthres.py --lcovthres=0.3 ../data/langs_all.json ../data/langs.json
+  % python format_wals/lthres.py --lcovthres=0.3 ../data/langs_all.json ../data/langs.json
 
 
 *Missing data imputation
