@@ -9,52 +9,60 @@ from collections import defaultdict
 from argparse import ArgumentParser
 
 sys.path.insert(1, os.path.join(os.path.join(sys.path[0], os.path.pardir), os.path.pardir))
-from json_utils import load_json_file
+from json_utils import load_json_file, load_json_stream
 
-def eval_mv(filledlist, hidelist, langlist):
+def eval_mv(filledlist, langs):
     total = 0
     correct = 0
-    for label, flist in langlist.iteritems():
-        for fid, rv in enumerate(flist):
-            if rv >= 0 and hidelist[label][fid] == -1:
+    for lang, flang in zip(langs, filledlist):
+        for wals_id, v in lang["features"].iteritems():
+            if wals_id not in flang["features"]:
                 total += 1
-                if filledlist[label][fid] == rv:
+                if flang["features_filled"][wals_id] == v:
                     correct += 1
     return (total, correct)
 
-def eval_most_frequent(hidelist, langlist):
-    # NOTE: most frequent values are based on hidelist, not langlist (reference)
-    fsize = len(langlist[langlist.keys()[0]])
-    fid_freq_list = [defaultdict(int) for _ in xrange(fsize)]
-    for label, flist in hidelist.iteritems():
-        for fid, v in enumerate(flist):
-            if v >= 0:
-                fid_freq_list[fid][v] += 1
-    fid_maxv = [-1 for _ in xrange(fsize)]
-    for fid in xrange(fsize):
-        _sorted = sorted(fid_freq_list[fid].keys(), key=lambda x: fid_freq_list[fid][x], reverse=True)
-        fid_maxv[fid] = _sorted[0]
+def eval_most_frequent(fid2struct, hidelist, langs):
+    # NOTE: most frequent values are based on hidelist, not langs (reference)
+    fsize = len(fid2struct)
+    wals_id2histogram = {}
+    for hlang in hidelist:
+        for wals_id, v in hlang["features"].iteritems():
+            if wals_id not in wals_id2histogram:
+                wals_id2histogram[wals_id] = defaultdict(int)
+            wals_id2histogram[wals_id][v] += 1
+    wals_id2maxk = {}
+    for wals_id, histogram in wals_id2histogram.iteritems():
+        maxk, maxv = None, -1
+        for k, v in histogram.iteritems():
+            if v >= maxv:
+                maxv = v
+                maxk = k
+        wals_id2maxk[wals_id] = maxk
 
     total = 0
     correct = 0
-    for label, flist in langlist.iteritems():
-        for fid, rv in enumerate(flist):
-            if rv >= 0 and hidelist[label][fid] == -1:
+    for lang, hlang in zip(langs, hidelist):
+        for wals_id, v in lang["features"].iteritems():
+            if wals_id not in hlang["features"]:
                 total += 1
-                if fid_maxv[fid] == rv:
+                if wals_id2maxk[wals_id] == v:
                     correct += 1
     return (total, correct)
 
-def eval_random(fid2struct, langlist):
+def eval_random(fid2struct, langs):
     total = 0
     correct = 0
-    for label, flist in langlist.iteritems():
-        for fid, rv in enumerate(flist):
-            if rv >= 0:
-                total += 1
-                r = np.random.random_integers(0, len(fid2struct[fid]["vid2label"]) - 1)
-                if rv == r:
-                    correct += 1
+
+    wals_id2size = {}
+    for struct in fid2struct:
+        wals_id2size[struct["wals_id"]] = len(struct["vid2label"])
+    for lang in langs:
+        for wals_id, v in lang["features"].iteritems():
+            total += 1
+            r = np.random.random_integers(0, wals_id2size[struct["wals_id"]] - 1)
+            if v == r:
+                correct += 1
     return (total, correct)
 
 
@@ -73,17 +81,17 @@ def main():
         np.random.seed(args.seed)
         random.seed(args.seed)
 
-    langlist = load_json_file(args.langs)
+    langs = [lang for lang in load_json_stream(open(args.langs))]
     if args.random:
         fid2struct = load_json_file(args.f2)
-        total, correct = eval_random(fid2struct, langlist)
+        total, correct = eval_random(fid2struct, langs)
     elif args.most_frequent:
-        hidelist = load_json_file(args.f1)
-        total, correct = eval_most_frequent(hidelist, langlist)
+        hidelist = [lang for lang in load_json_stream(open(args.f1))]
+        fid2struct = load_json_file(args.f2)
+        total, correct = eval_most_frequent(fid2struct, hidelist, langs)
     else:
-        filledlist = load_json_file(args.f1)
-        hidelist = load_json_file(args.f2)
-        total, correct = eval_mv(filledlist, hidelist, langlist)
+        filledlist = [lang for lang in load_json_stream(open(args.f1))]
+        total, correct = eval_mv(filledlist, langs)
     sys.stdout.write("%f\t%d\t%d\n" % (float(correct) / total, correct, total))
 
 

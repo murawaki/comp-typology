@@ -7,7 +7,7 @@ import random
 from argparse import ArgumentParser
 
 sys.path.insert(1, os.path.join(os.path.join(sys.path[0], os.path.pardir), os.path.pardir))
-from json_utils import load_json_file
+from json_utils import load_json_file, load_json_stream
 
 
 def main():
@@ -15,6 +15,7 @@ def main():
     parser.add_argument("-s", "--seed", dest="seed", metavar="INT", type=int, default=None,
                         help="random seed")
     parser.add_argument("src", metavar="SOURCE", default=None)
+    parser.add_argument("flist", metavar="FLIST", default=None)
     parser.add_argument("dst", metavar="DESTINATION", default=None)
     parser.add_argument("cvn", metavar="INT", default=None)
     args = parser.parse_args()
@@ -24,13 +25,18 @@ def main():
 
     src, dst = args.src, args.dst
     cvn = int(args.cvn)
-    langlist = load_json_file(src)
+    langs = [lang for lang in load_json_stream(open(src))]
+    fid2struct = load_json_file(args.flist)
 
     filled_list = []
-    for label, flist in langlist.iteritems():
-        for fid, v in enumerate(flist):
-            if v >= 0:
-                filled_list.append((label, fid))
+    for lang in langs:
+        for wals_id, v in lang["features"].iteritems():
+            filled_list.append((lang["wals_code"], wals_id))
+        # for struct in fid2struct:
+        #     wals_id = struct["wals_id"]
+        #     if wals_id in lang["features"]:
+        #         fid = struct["fid"]
+        #         filled_list.append((lang["wals_code"], fid))
 
     random.shuffle(filled_list)
 
