@@ -7,5 +7,5 @@ args <- commandArgs(trailingOnly = TRUE)
 
 library("missMDA")
 d <- read.table(args[[1]], sep="\t", header=TRUE, na.strings="NA", colClass=c('factor'))
-res.impute <- imputeMCA(d, threshold=0.4E-2, maxiter=9000)
+res.impute <- imputeMCA(d, threshold=0.015, maxiter=9000)
 write.table(res.impute$completeObs, file=args[[2]], sep="\t", quote=FALSE)

@@ -7,23 +7,25 @@ import codecs
 import json
 
 sys.path.insert(1, os.path.join(sys.path[0], os.path.pardir))
-from json_utils import load_json_file
+from json_utils import load_json_file, load_json_stream
 
 
-def main(fpath, src, dst):
+def main(src, fpath, dst):
     fid2struct = load_json_file(fpath)
-    langlist = load_json_file(src)
 
     with codecs.getwriter("utf-8")(open(dst, 'w')) as f:
-        rv = "\t".join([feature["name"] for feature in fid2struct])
+        rv = "\t".join([struct["name"] for struct in fid2struct])
         f.write(rv + "\n")
-        for name, flist in langlist.iteritems():
-            rv = name + "\t"
-            for fid, v in enumerate(flist):
-                if v == -1:
-                    rv += "NA\t"
-                else:
+
+        for i, lang in enumerate(load_json_stream(open(src))):
+            rv = str(i) + "\t"
+            for struct in fid2struct:
+                wals_id = struct["wals_id"]
+                if wals_id in lang["features"]:
+                    v = lang["features"][wals_id]
                     rv += str(int(v)) + "\t"
+                else:
+                    rv += "NA\t"
             rv = rv[0:len(rv) - 1]
             f.write(rv + "\n")
 

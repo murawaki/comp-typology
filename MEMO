@@ -27,15 +27,33 @@
 
 - Download language.csv from WALS http://wals.info/
 
-- Manually modify language.csv to obtain language.modified.csv, and
+- Manually modify language.csv to obtain language.modified.csv
+  (added some glottocodes available online)
 
+- Convert language.modified.csv to 2 json files
+% python format_wals/csv2json.py ../data/wals/language.modified.csv ../data/wals/langs_all.json ../data/wals/flist_all.json
+
+- Fill logically determined items
+  % python format_wals/logical.py ../data/wals/langs_all.json ../data/wals/flist_all.json ../data/wals/langs_aug.json ../data/wals/flist_aug.json
+
+- Remove features with fill filled languages
+  % python format_wals/fthres.py --fthres=0.1 ../data/wals/langs_aug.json ../data/wals/flist_aug.json ../data/wals/langs_full.json ../data/wals/flist.json
+
+- Remove languages with few filled features
+  % python format_wals/lthres.py --lthres=0.3 ../data/wals/langs_full.json ../data/wals/flist.json ../data/wals/langs.json
+
+
+
+
+
+
+<DEL>
   % cd scripts
   % perl format_wals/langlist.pl < ../data/language.modified.csv > ../data/langlist.out 2> ../data/langlist.err
 
 
 TODO: SWITCH TO Glottolog.
 
-<DEL>
 - Download Ethnologue pages using WALS's ISO codes
 
   % cd data/ethnologue
@@ -44,7 +62,6 @@ TODO: SWITCH TO Glottolog.
 - Extract classifications from Ethnologue pages
 
   % for f in ???; do echo -e "$f\t"`cat $f | perl -nle'if(/<div class=\"field-label\">Classification<\/div>/){$flag=1;}if($flag and /\">([^<]+)<\/a>/) { print $1; exit }'`; done > ../classifications
-</DEL>
 
 
 - Create JSON files
@@ -56,29 +73,24 @@ TODO: SWITCH TO Glottolog.
 
   % cd scripts
   % perl format_wals/format.pl ../data/langlist.out ../data/language.modified.csv ../data/classifications ../data/tree.json ../data/features_all.json ../data/walstree.json
+</DEL>
 
-- Remove low-frequency features
 
-  % python format_wals/fthres.py --fcovthres=0.1 --feature2=../data/features.json ../data/tree.json ../data/features_all.json ../data/langs_all.json ../data/fidmap.json
-
-- Remove low-coverage languages
-
-  % python format_wals/lthres.py --lcovthres=0.3 ../data/langs_all.json ../data/langs.json
 
 
 *Missing data imputation
 
 - For the PARTIAL dataset:
 
-  % python mv/json2tsv.py ../data/features.json ../data/langs.json ../data/langs.tsv
-  % R --vanilla -f mv/impute_mca.r --args ../data/langs.tsv ../data/langs.filled.tsv
-  % python mv/tsv2json.py ../data/langs.filled.tsv ../data/langs.filled.json
+  % python mv/json2tsv.py ../data/wals/langs.json ../data/wals/flist.json ../data/wals/langs.tsv
+  % R --vanilla -f mv/impute_mca.r --args ../data/wals/langs.tsv ../data/wals/langs.filled.tsv
+  % python mv/tsv2json.py ../data/wals/langs.json ../data/wals/langs.filled.tsv ../data/wals/flist.json ../data/wals/langs.filled.json
 
 - For the FULL dataset:
 
-  % python mv/json2tsv.py ../data/features.json ../data/langs_all.json ../data/langs_all.tsv
-  % R --vanilla -f mv/impute_mca.r --args ../data/langs_all.tsv ../data/langs_all.filled.tsv
-  % python mv/tsv2json.py ../data/langs_all.filled.tsv ../data/langs_all.filled.json
+  % python mv/json2tsv.py ../data/wals/langs_full.json ../data/wals/flist.json ../data/wals/langs_full.tsv
+  % R --vanilla -f mv/impute_mca.r --args ../data/wals/langs_full.tsv ../data/wals/langs_full.filled.tsv
+  % python mv/tsv2json.py ../data/wals/langs_full.json ../data/wals/langs_full.filled.tsv ../data/wals/flist.json ../data/wals/langs_full.filled.json
 
 
 **Evaluating missing data imputation by cross-validation
