@@ -1,44 +1,41 @@
 # -*- coding: utf-8 -*-
-
+#
+# filter out languages by feature coverage
+#
 import sys, os
 import codecs
 import json
 from argparse import ArgumentParser
 
 sys.path.insert(1, os.path.join(sys.path[0], os.path.pardir))
-from json_utils import load_json_file
+from json_utils import load_json_file, load_json_stream
 
 
 def main():
     sys.stderr = codecs.getwriter("utf-8")(sys.stderr)
 
     parser = ArgumentParser()
-    parser.add_argument("--lcovthres", dest="lcovthres", metavar="FLOAT", type=float, default=0.0,
+    parser.add_argument("--lthres", dest="lthres", metavar="FLOAT", type=float, default=0.0,
                         help="eliminate languages with higher rate of missing values [0,1]")
     parser.add_argument("langs_all", metavar="INPUT", default=None)
+    parser.add_argument("flist", metavar="FLIST", default=None)
     parser.add_argument("langs", metavar="OUTPUT", default=None)
     args = parser.parse_args()
 
-    # input
-    langlist_all = load_json_file(args.langs_all)
-    # output
-    langfile = args.langs
+    fid2struct = load_json_file(args.flist)
+    fsize = len(fid2struct)
+    sys.stderr.write("%d featurs\n" % fsize)
 
-    train_total = 0
-    langlist = {}
-    fsize = len(langlist_all[langlist_all.keys()[0]])
-    for label, flist in langlist_all.iteritems():
-        cov = 0
-        for f,v in enumerate(flist):
-            if v != -1:
-                cov += 1
-        if float(cov) / fsize >= args.lcovthres:
-            langlist[label] = flist
+    lang_total, lang_survived = 0, 0
+    with codecs.getwriter("utf-8")(open(args.langs, "w")) as out:
+        for lang in load_json_stream(open(args.langs_all)):
+            lang_total += 1
+            if float(len(lang["features"])) / fsize >= args.lthres:
+                lang_survived += 1
+                out.write("%s\n" % json.dumps(lang))
 
-    sys.stderr.write("language thresholding: %d -> %d\n" % (len(langlist_all), len(langlist)))
+    sys.stderr.write("language thresholding: %d -> %d\n" % (lang_total, lang_survived))
 
-    with codecs.getwriter("utf-8")(open(langfile, 'w')) as f:
-        f.write(json.dumps(langlist))
 
 if __name__ == "__main__":
     main()
