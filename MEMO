@@ -32,6 +32,10 @@
   % cd scripts
   % perl format_wals/langlist.pl < ../data/language.modified.csv > ../data/langlist.out 2> ../data/langlist.err
 
+
+TODO: SWITCH TO Glottolog.
+
+<DEL>
 - Download Ethnologue pages using WALS's ISO codes
 
   % cd data/ethnologue
@@ -40,6 +44,8 @@
 - Extract classifications from Ethnologue pages
 
   % for f in ???; do echo -e "$f\t"`cat $f | perl -nle'if(/<div class=\"field-label\">Classification<\/div>/){$flag=1;}if($flag and /\">([^<]+)<\/a>/) { print $1; exit }'`; done > ../classifications
+</DEL>
+
 
 - Create JSON files
   - Notes:
