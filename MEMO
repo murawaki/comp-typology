@@ -11,18 +11,22 @@
 
 - Python2
   - numpy
+<DEL>
 - Perl (for preprocessing)
+</DEL>
 - R (for missing data imputation)
-  - missMDA
+  - missMDA package
 
 
 *Data setup
-  The main outputs are:
+  The main outputs are (in data/ dir):
+<DEL>
   - tree.json: Ethnologue tree
   - walstree.json: two-level WALS tree
   - features.json: WALS features (after thresholding)
-  - langs.filled.json: set of languages for the PARTIAL data with missing data imputation
-  - langs_all.filled.json: set of languages for the FULL data with missing data imputation
+</DEL>
+  - langs.json: set of languages for the PARTIAL data with missing data imputation
+  - langs_all.json: set of languages for the FULL data with missing data imputation
 
 
 - Download language.csv from WALS http://wals.info/
@@ -115,7 +119,7 @@ TODO: SWITCH TO Glottolog.
 
   Source and destination languages are specified by WALS code
 
-  German (ger) and English (eng)
+  - German (ger) and English (eng)
 
   % python mix_langs.py --src=ger --dst=eng --hid ../data/model_nested_100_010.json ../data/langs.json | tee ../data/mix/ger_eng_nested_hid
   % python mix_langs.py --src=ger --dst=eng --hid --auto  ../data/model_nested_100_010.json ../data/langs.json | tee ../data/mix/ger_eng_nested_hid2
@@ -124,10 +128,39 @@ TODO: SWITCH TO Glottolog.
   # gnuplot
   plot "ger_eng_nested_cat" using 1:2 with lines title "cat", "ger_eng_nested_cat" using 1:2:3 with yerr notitle, "ger_eng_nested_hid" using 1:2 with lines title "hid (orig)", "ger_eng_nested_hid2" using 1:2 with lines title "hid (binarized)"
 
-  Khmer (khm) and Kharia (khr)
+
+  - Khmer (khm) and Kharia (khr)
 
   % python mix_langs.py --src=khm --dst=khr --hid ../data/model_nested_100_010.json ../data/langs.json | tee ../data/mix/khm_khr_nested_hid
   % python mix_langs.py --src=khm --dst=khr --hid --auto  ../data/model_nested_100_010.json ../data/langs.json | tee ../data/mix/khm_khr_nested_hid2
   % python mix_langs.py --src=khm --dst=khr --cat ../data/model_nested_100_010.json ../data/langs.json | tee ../data/mix/khm_khr_nested_cat
 
   plot "khm_khr_nested_cat" using 1:2 with lines title "cat", "khm_khr_nested_cat" using 1:2:3 with yerr notitle, "khm_khr_nested_hid" using 1:2 with lines title "hid (orig)", "khm_khr_nested_hid2" using 1:2 with lines title "hid (binarized)"
+
+
+
+
+* Tree
+
+  In NAACL 2015, we used the Ethnologue classification, but we now use Glottolog.
+
+  - Download Glottolog classification
+
+  % cd data/glottolog
+  % wget http://glottolog.org/static/trees/tree-glottolog-newick.txt
+
+<DEL>
+  - Download Glottocodes
+
+  % wget http://glottolog.org/resourcemap.json?rsc=language
+</DEL>
+
+  - Convert Newick format into Python pickle (JSON is not used due to cyclic links)
+
+  % python glottolog/newick_tree.py ../data/glottolog/tree-glottolog-newick.txt ../data/glottolog/trees.pkl
+
+  - Merge Glottolog trees with WALS languages
+
+  % python glottolog/merge.py ../data/langs.json ../data/glottolog/trees.pkl ../data/trees.json
+
+  % python glottolog/merge.py --lthres=0.3 ../data/langs_full.json ../data/glottolog/trees.pkl ../data/trees_full.json

@@ -42,7 +42,7 @@ class TreeParser(object):
     COMMA = 5
     ANNOTATION = 6
     BRANCH = 7
-    taxa_re = re.compile(r"((?:[A-Za-z0-9_\-\.\[\]]+)|(?:\'(?:\\\'|[^\'])+)\')")
+    taxa_re = re.compile(r"(?:(?P<uq>[A-Za-z0-9_\-\.\[\]]+)|(?:\'(?P<q>(?:\\\'|[^\'])+)\'))")
     branch_re = re.compile(r"(\d+(?:\.\d+))")
 
     def __init__(self, dat):
@@ -97,7 +97,7 @@ class TreeParser(object):
             else:
                 match = self.taxa_re.search(tree_data, idx)
                 assert(match is not None)
-                taxa = tree_data[match.start():match.end()]
+                taxa = match.group('uq') or match.group('q')
                 obj = {
                     'type': self.NODE,
                     'taxa': taxa,
