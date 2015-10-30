@@ -33,8 +33,6 @@ class Node(object):
     def __init__(self, _id):
         self._id = _id
         self.children = []
-    def __unicode__(self):
-        return unicode(self._id)
 
 class TreeParser(object):
     START = 1
