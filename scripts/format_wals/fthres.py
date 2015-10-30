@@ -28,7 +28,7 @@ def main():
         "39B", # Inclusive/Exclusive Forms in Pama-Nyungan -- only covers Pama-Nyungan
         "81B", # Languages with two Dominant Orders of Subject, Object, and Verb -- no value for non-applicable
         "139A", # Irregular Negatives in Sign Languages
-        "140A", # Question Particles in Sign Languages"
+        "140A", # Question Particles in Sign Languages
         "141A", # Writing Systems -- irrelevant
     ]
 
