@@ -48,7 +48,7 @@
 
 <DEL>
   % cd scripts
-  % perl format_wals/langlist.pl < ../data/language.modified.csv > ../data/langlist.out 2> ../data/langlist.err
+  % perl format_wals/langlist.pl < ../data/wals/language.modified.csv > ../data/wals/langlist.out 2> ../data/wals/langlist.err
 
 
 TODO: SWITCH TO Glottolog.
@@ -56,11 +56,11 @@ TODO: SWITCH TO Glottolog.
 - Download Ethnologue pages using WALS's ISO codes
 
   % cd data/ethnologue
-  % perl -anle '{if (! -f $F[0]){ printf "http://www.ethnologue.com/language/%s\n", $F[0]; }}' < ../langlist.out | wget -i - -w 60
+  % perl -anle '{if (! -f $F[0]){ printf "http://www.ethnologue.com/language/%s\n", $F[0]; }}' < ../wals/langlist.out | wget -i - -w 60
 
 - Extract classifications from Ethnologue pages
 
-  % for f in ???; do echo -e "$f\t"`cat $f | perl -nle'if(/<div class=\"field-label\">Classification<\/div>/){$flag=1;}if($flag and /\">([^<]+)<\/a>/) { print $1; exit }'`; done > ../classifications
+  % for f in ???; do echo -e "$f\t"`cat $f | perl -nle'if(/<div class=\"field-label\">Classification<\/div>/){$flag=1;}if($flag and /\">([^<]+)<\/a>/) { print $1; exit }'`; done > ../wals/ethnologue_classifications
 
 
 - Create JSON files
@@ -71,7 +71,7 @@ TODO: SWITCH TO Glottolog.
     - Languages labeled as "Deaf sign language", "Mixed language" or others are removed
 
   % cd scripts
-  % perl format_wals/format.pl ../data/langlist.out ../data/language.modified.csv ../data/classifications ../data/tree.json ../data/features_all.json ../data/walstree.json
+  % perl format_wals/format.pl ../data/wals/langlist.out ../data/wals/language.modified.csv ../data/wals/ethnologue_classifications ../data/tree.json ../data/features_all.json ../data/walstree.json
 </DEL>
 
 

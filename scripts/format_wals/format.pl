@@ -1,4 +1,6 @@
-
+#
+# WARNING: no longer used; will be deleted in the future
+#
 use strict;
 use warnings;
 
