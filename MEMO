@@ -31,7 +31,7 @@
   (added some glottocodes available online)
 
 - Convert language.modified.csv to 2 json files
-% python format_wals/csv2json.py ../data/wals/language.modified.csv ../data/wals/langs_all.json ../data/wals/flist_all.json
+  % python format_wals/csv2json.py ../data/wals/language.modified.csv ../data/wals/langs_all.json ../data/wals/flist_all.json
 
 - Fill logically determined items
   % python format_wals/logical.py ../data/wals/langs_all.json ../data/wals/flist_all.json ../data/wals/langs_aug.json ../data/wals/flist_aug.json
@@ -41,7 +41,6 @@
 
 - Remove languages with few filled features
   % python format_wals/lthres.py --lthres=0.3 ../data/wals/langs_full.json ../data/wals/flist.json ../data/wals/langs.json
-
 
 
 
@@ -96,3 +95,13 @@ TODO: SWITCH TO Glottolog.
 **Evaluating missing data imputation by cross-validation
 
   % make -j 8 -f mv/cv/autoeval.make all CV=10
+
+
+
+* Attach categorical vectors
+
+  % python format_wals/catvect.py ../data/wals/langs.filled.json ../data/wals/flist.json ../data/langs.json
+  % python format_wals/catvect.py ../data/wals/langs_full.filled.json ../data/wals/flist.json ../data/langs_full.json
+
+
+  % python train.py --seed=20 --minibatch=10 --eta=0.1 --Cscore=0.1 --iter=1000 --nested --dims=100 --dims2=10 ../data/langs.json ../data/wals/flist.json ../data/model_nested_100_010.json 2>&1 | tee ../data/model_nested_100_010.log

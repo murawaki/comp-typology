@@ -245,9 +245,9 @@ class BaseEvaluator(object):
         return binvect
 
 
-class NestedEvaluator(BaseEvaluator):
-    def __init__(self, binsize, dims=50, dims2=10, eta=0.01, _lambda=0.001, penalty=None):
-        super(NestedEvaluator, self).__init__(self, binsize=binsize, dims=dims, eta=eta, _lambda=_lambda, penalty=penalty)
+class NestedEvaluator(object):
+    def init_nested(self, binsize, dims=50, dims2=10):
+        # super(NestedEvaluator, self).__init__(binsize, dims=dims, eta=eta, _lambda=_lambda, penalty=penalty)
         self.dims2 = dims2
         self.weight_list.append(("Wh", "gWh"))
         self.weight_list.append(("bh", "gbh"))
@@ -396,7 +396,8 @@ class NestedBinaryFeatureListEvaluator(NestedEvaluator, BinaryFeatureListEvaluat
         if is_empty:
             return
 
-        NestedEvaluator.__init__(self, binsize, dims=dims, eta=eta, _lambda=_lambda, penalty=penalty, is_empty=is_empty)
+        super(NestedBinaryFeatureListEvaluator, self).__init__(binsize, dims=dims, eta=eta, _lambda=_lambda, penalty=penalty, is_empty=is_empty)
+        self.init_nested(binsize, dims=dims, dims2=dims2)
         self.logZ = None
 
     def _denumpy(self):
@@ -488,22 +489,22 @@ class CategoricalFeatureListEvaluator(BaseEvaluator):
         return binvect
 
     def train_scorer(self, tnode, burn_in=100, interval=10, psamples=100, nsamples=100, Cscore=1.0, delta=None):
-        # 4 types of negative samples
+        ## 4 types of negative samples
         #
-        # 1. samples from around positive samples without categorical constraints
+        ## 1. samples from around positive samples without categorical constraints
         # 2. samples from around positive samples with categorical constraints
-        # 3. samples from a long-lasting MCMC chain without categorical constraints
+        ## 3. samples from a long-lasting MCMC chain without categorical constraints
         # 4. samples from a long-lasting MCMC chain with categorical constraints
 
-        # # binvect may violate categorical constraints
-        current = tnode.binvect
-        current_hvect = self.encode(current)
-        current_score = self.calc_score(current_hvect)
-        # calc the expected count
-        for _iter1 in xrange(nsamples):
-            for _iter2 in xrange(0, interval):
-                current, current_hvect, current_score, is_accepted = self._sample_unconstrained(current, current_hvect, current_score)
-            delta = self.calc_delta_scorer(current, current_hvect, delta=delta, count=-Cscore / (4 * nsamples))
+        # # # binvect may violate categorical constraints
+        # current = tnode.binvect
+        # current_hvect = self.encode(current)
+        # current_score = self.calc_score(current_hvect)
+        # # calc the expected count
+        # for _iter1 in xrange(nsamples):
+        #     for _iter2 in xrange(0, interval):
+        #         current, current_hvect, current_score, is_accepted = self._sample_unconstrained(current, current_hvect, current_score)
+        #     delta = self.calc_delta_scorer(current, current_hvect, delta=delta, count=-Cscore / (4 * nsamples))
 
         # # binvect never violates categorical constraints
         current_catvect = tnode.catvect
@@ -517,17 +518,17 @@ class CategoricalFeatureListEvaluator(BaseEvaluator):
                     self._sample_all_constrained(current_catvect, current_binvect, current_hvect, current_score)
             delta = self.calc_delta_scorer(current_binvect, current_hvect, delta=delta, count=-Cscore / (4 * nsamples))
 
-        # random MCMC without categorical constraints
-        if not hasattr(tnode, "rand_binvect") or np.random.uniform(0.0, 1.0) < 0.00005:
-            sys.stderr.write("reset rand binvect\n")
-            r = np.random.random_integers(1, 20)  # control the frequency of 0-valued elements
-            tnode.rand_binvect = np.random.random_integers(0, r, size=self.binsize) / r
-        rand_hvect = self.encode(tnode.rand_binvect)
-        rand_score = self.calc_score(rand_hvect)
-        for _iter1 in xrange(nsamples):
-            for _iter2 in xrange(0, interval):
-                tnode.rand_binvect, rand_hvect, rand_score, is_accepted = self._sample_unconstrained(tnode.rand_binvect, rand_hvect, rand_score)
-            delta = self.calc_delta_scorer(tnode.rand_binvect, rand_hvect, delta=delta, count=-Cscore / (4 * nsamples))
+        # # random MCMC without categorical constraints
+        # if not hasattr(tnode, "rand_binvect") or np.random.uniform(0.0, 1.0) < 0.00005:
+        #     sys.stderr.write("reset rand binvect\n")
+        #     r = np.random.random_integers(1, 20)  # control the frequency of 0-valued elements
+        #     tnode.rand_binvect = np.random.random_integers(0, r, size=self.binsize) / r
+        # rand_hvect = self.encode(tnode.rand_binvect)
+        # rand_score = self.calc_score(rand_hvect)
+        # for _iter1 in xrange(nsamples):
+        #     for _iter2 in xrange(0, interval):
+        #         tnode.rand_binvect, rand_hvect, rand_score, is_accepted = self._sample_unconstrained(tnode.rand_binvect, rand_hvect, rand_score)
+        #     delta = self.calc_delta_scorer(tnode.rand_binvect, rand_hvect, delta=delta, count=-Cscore / (4 * nsamples))
 
         # random MCMC with categorical constraints
         if not hasattr(tnode, "randnode") or np.random.uniform(0.0, 1.0) < 0.0001:
@@ -625,10 +626,11 @@ class NestedCategoricalFeatureListEvaluator(NestedEvaluator, CategoricalFeatureL
         self.map_cat2bin = np.empty((self.catsize, 2), dtype=np.int32) # (first elem. idx, size)
         for fid, fnode in enumerate(fid2struct):
             size = len(fnode["vid2label"])
-            self.map_cat2bin[fid] = [self.binsize, size]
+            self.map_cat2bin[fid] = [binsize, size]
             binsize += size
 
-        NestedEvaluator.__init__(self, binsize, dims=dims, dims2=dims2, eta=eta, _lambda=_lambda, penalty=penalty)
+        super(NestedCategoricalFeatureListEvaluator, self).__init__(fid2struct, dims=dims, eta=eta, _lambda=_lambda, penalty=penalty, is_empty=is_empty)
+        self.init_nested(binsize, dims=dims, dims2=dims2)
         self.map_bin2cat = np.empty((self.binsize, 2), dtype=np.int32) # (fid, idx)
 
         idx = 0

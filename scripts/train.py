@@ -9,7 +9,7 @@ import numpy as np
 import random
 from argparse import ArgumentParser
 
-from json_utils import load_json_file
+from json_utils import load_json_file, load_json_stream
 from evaluator import CategoricalFeatureList, CategoricalFeatureListEvaluator, NestedCategoricalFeatureListEvaluator
 
 def cum_error(binvect_list, evaluator):
@@ -84,7 +84,7 @@ def main():
     parser.add_argument("--psamples", dest="psamples", metavar="INT", type=int, default=10)
     parser.add_argument("--nsamples", dest="nsamples", metavar="INT", type=int, default=10)
     parser.add_argument("langs", metavar="LANG", default=None)
-    parser.add_argument("fid2struct", metavar="FID2STRUCT", default=None)
+    parser.add_argument("fid2struct", metavar="FLIST", default=None)
     parser.add_argument("model", metavar="MODEL", default=None)
     args = parser.parse_args()
 
@@ -92,7 +92,6 @@ def main():
         np.random.seed(args.seed)
         random.seed(args.seed)
 
-    langlist_orig = load_json_file(args.langs)
     fid2struct = load_json_file(args.fid2struct)
     modelfile = args.model
 
@@ -104,9 +103,9 @@ def main():
     # mv_count = 0
     train_total = 0
     langlist = []
-    for label, lang in langlist_orig.iteritems():
-        tnode = CategoricalFeatureList(lang, evaluator, has_missing_values=False)
-        tnode.label = label
+    for lang in load_json_stream(open(args.langs)):
+        tnode = CategoricalFeatureList(lang["catvect_filled"], evaluator, has_missing_values=False)
+        tnode.lang = lang
         train_total += 1
         langlist.append(tnode)
 
@@ -114,7 +113,7 @@ def main():
     # sys.stderr.write("missing value rate: %f\n" %  (mv_count / (float(train_total * evaluator.catsize))))
     sys.stderr.write("# of binvect elems: %d\n" % evaluator.binsize)
     sys.stderr.write("# of training instances: %d\n" % train_total)
-    sys.stderr.write("Cscore: %d\n" % args.Cscore)
+    sys.stderr.write("Cscore: %f\n" % args.Cscore)
     sys.stderr.write("# of hidden dims: %d\n" % evaluator.dims)
     if args.nested:
         sys.stderr.write("# of hidden dims2: %d\n" % evaluator.dims2)
