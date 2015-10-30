@@ -30,7 +30,7 @@
 - Manually modify language.csv to obtain language.modified.csv
   (added some glottocodes available online)
 
-- Convert language.modified.csv to 2 json files
+- Convert language.modified.csv to 2 json files (and remove "Sign Languages" and "Creoles and Pidgins")
   % python format_wals/csv2json.py ../data/wals/language.modified.csv ../data/wals/langs_all.json ../data/wals/flist_all.json
 
 - Fill logically determined items
@@ -104,4 +104,30 @@ TODO: SWITCH TO Glottolog.
   % python format_wals/catvect.py ../data/wals/langs_full.filled.json ../data/wals/flist.json ../data/langs_full.json
 
 
+* Train the evaluator
+
   % python train.py --seed=20 --minibatch=10 --eta=0.1 --Cscore=0.1 --iter=1000 --nested --dims=100 --dims2=10 ../data/langs.json ../data/wals/flist.json ../data/model_nested_100_010.json 2>&1 | tee ../data/model_nested_100_010.log
+
+
+
+
+* Mix two languages
+
+  Source and destination languages are specified by WALS code
+
+  German (ger) and English (eng)
+
+  % python mix_langs.py --src=ger --dst=eng --hid ../data/model_nested_100_010.json ../data/langs.json | tee ../data/mix/ger_eng_nested_hid
+  % python mix_langs.py --src=ger --dst=eng --hid --auto  ../data/model_nested_100_010.json ../data/langs.json | tee ../data/mix/ger_eng_nested_hid2
+  % python mix_langs.py --src=ger --dst=eng --cat ../data/model_nested_100_010.json ../data/langs.json | tee ../data/mix/ger_eng_nested_cat
+
+  # gnuplot
+  plot "ger_eng_nested_cat" using 1:2 with lines title "cat", "ger_eng_nested_cat" using 1:2:3 with yerr notitle, "ger_eng_nested_hid" using 1:2 with lines title "hid (orig)", "ger_eng_nested_hid2" using 1:2 with lines title "hid (binarized)"
+
+  Khmer (khm) and Kharia (khr)
+
+  % python mix_langs.py --src=khm --dst=khr --hid ../data/model_nested_100_010.json ../data/langs.json | tee ../data/mix/khm_khr_nested_hid
+  % python mix_langs.py --src=khm --dst=khr --hid --auto  ../data/model_nested_100_010.json ../data/langs.json | tee ../data/mix/khm_khr_nested_hid2
+  % python mix_langs.py --src=khm --dst=khr --cat ../data/model_nested_100_010.json ../data/langs.json | tee ../data/mix/khm_khr_nested_cat
+
+  plot "khm_khr_nested_cat" using 1:2 with lines title "cat", "khm_khr_nested_cat" using 1:2:3 with yerr notitle, "khm_khr_nested_hid" using 1:2 with lines title "hid (orig)", "khm_khr_nested_hid2" using 1:2 with lines title "hid (binarized)"
