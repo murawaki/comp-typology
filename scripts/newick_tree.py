@@ -8,10 +8,15 @@ import re
 def label_clades(node):
     clade_dict = {}
     def _label_clades_main(node):
-        if hasattr(node, "left"):
-            label_list = _label_clades_main(node.left) + _label_clades_main(node.right)
-            label_list.sort()
-            node.clade = ":".join(label_list)
+        label_list = []
+        for cnode in node.children:
+            label_list += _label_clades_main(cnode)
+        label_list.sort()
+        node.clade = ":".join(label_list)        
+        # if hasattr(node, "left"):
+        #     label_list = _label_clades_main(node.left) + _label_clades_main(node.right)
+        #     label_list.sort()
+        #     node.clade = ":".join(label_list)
         if not hasattr(node, "parent"): # root
             node.clade = "ROOT"
             label_list = [node.clade]
@@ -27,6 +32,9 @@ def label_clades(node):
 class Node(object):
     def __init__(self, _id):
         self._id = _id
+        self.children = []
+    def __unicode__(self):
+        return unicode(self._id)
 
 class TreeParser(object):
     START = 1
@@ -110,7 +118,8 @@ class TreeParser(object):
             if token == self.START:
                 node2 = Node(_id=count)
                 count += 1
-                node.left = node2
+                assert(len(node.children) == 0)
+                node.children.append(node2)
                 node2.parent = node
                 node = node2
             elif token == self.END:
@@ -126,7 +135,8 @@ class TreeParser(object):
             elif token == self.COMMA:
                 node2 = Node(_id=count)
                 count += 1
-                node.parent.right = node2
+                assert(len(node.parent.children) > 0)
+                node.parent.children.append(node2)
                 node2.parent = node.parent
                 node = node2
             elif token['type'] == self.ANNOTATION:
