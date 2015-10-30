@@ -44,7 +44,7 @@ class TreeParser(object):
     COMMA = 5
     ANNOTATION = 6
     BRANCH = 7
-    taxa_re = re.compile(r"(?:([A-Za-z0-9_\-\.\[\]]+)|(\'[A-Za-z0-9_\-\.\[\] ]+)\')")
+    taxa_re = re.compile(r"((?:[A-Za-z0-9_\-\.\[\]]+)|(?:\'(?:\\\'|[^\'])+)\')")
     branch_re = re.compile(r"(\d+(?:\.\d+))")
 
     def __init__(self, dat):

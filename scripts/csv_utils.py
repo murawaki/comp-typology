@@ -2,6 +2,17 @@
 import codecs
 import csv
 
+def load_csv_with_legend(fpath):
+    csv = UnicodeReader(open(fpath, 'rb'))
+    legend = cvs.next()
+    rv = []
+    for row in csv:
+        code = {}
+        for k, v in zip(legend, row):
+            code[k] = v
+        rv.append(code)
+    return rv
+
 class UTF8Recoder:
     """
     Iterator that reads an encoded stream and reencodes the input to UTF-8
