@@ -80,10 +80,11 @@ def shrink_tree(node):
         else:
             if len(node.children) > 1:
                 # valid intermediate node
-                pass
+                if len(node.children) > 2:
+                    sys.stderr.write("\tnode %s has %d children (%d nodes need to be added to bifurcate)\n" % (node.name, len(node.children), len(node.children) - 2))
             else:
                 # skip intermediate node by overriding the node
-                sys.stderr.write("skipping node %s (non-leaf with one child)\n" % node.name)
+                # sys.stderr.write("skipping node %s (non-leaf with one child)\n" % node.name)
                 parent = None
                 if hasattr(node, "parent"):
                     parent = node.parent
