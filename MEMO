@@ -25,8 +25,8 @@
   - walstree.json: two-level WALS tree
   - features.json: WALS features (after thresholding)
 </DEL>
-  - langs.json: set of languages for the PARTIAL data with missing data imputation
-  - langs_all.json: set of languages for the FULL data with missing data imputation
+  - langs.json: set of languages for the PARTIAL data with missing data imputed
+  - langs_all.json: set of languages for the FULL data with missing data imputed
 
 
 - Download language.csv from WALS http://wals.info/
@@ -40,10 +40,10 @@
 - Fill logically determined items
   % python format_wals/logical.py ../data/wals/langs_all.json ../data/wals/flist_all.json ../data/wals/langs_aug.json ../data/wals/flist_aug.json
 
-- Remove features with fill filled languages
+- Remove low-coverage features (in terms of the number of languages)
   % python format_wals/fthres.py --fthres=0.1 ../data/wals/langs_aug.json ../data/wals/flist_aug.json ../data/wals/langs_full.json ../data/wals/flist.json
 
-- Remove languages with few filled features
+- Remove low-coverage languages (in terms of the number of features)
   % python format_wals/lthres.py --lthres=0.3 ../data/wals/langs_full.json ../data/wals/flist.json ../data/wals/langs.json
 
 
@@ -54,8 +54,6 @@
   % cd scripts
   % perl format_wals/langlist.pl < ../data/wals/language.modified.csv > ../data/wals/langlist.out 2> ../data/wals/langlist.err
 
-
-TODO: SWITCH TO Glottolog.
 
 - Download Ethnologue pages using WALS's ISO codes
 
