@@ -15,8 +15,10 @@ def main():
     sys.stderr = codecs.getwriter("utf-8")(sys.stderr)
 
     parser = ArgumentParser()
-    parser.add_argument("--lthres", dest="lthres", metavar="FLOAT", type=float, default=0.0,
+    parser.add_argument("--lthres", metavar="FLOAT", type=float, default=0.0,
                         help="eliminate languages with higher rate of missing values [0,1]")
+    parser.add_argument("--removed", metavar="FILE", default=None,
+                        help="save languages under the threshold")
     parser.add_argument("langs_all", metavar="INPUT", default=None)
     parser.add_argument("flist", metavar="FLIST", default=None)
     parser.add_argument("langs", metavar="OUTPUT", default=None)
@@ -26,6 +28,9 @@ def main():
     fsize = len(fid2struct)
     sys.stderr.write("%d featurs\n" % fsize)
 
+    if args.removed is not None:
+        fr = codecs.getwriter("utf-8")(open(args.removed, "w"))
+
     lang_total, lang_survived = 0, 0
     with codecs.getwriter("utf-8")(open(args.langs, "w")) as out:
         for lang in load_json_stream(open(args.langs_all)):
@@ -33,7 +38,10 @@ def main():
             if float(len(lang["features"])) / fsize >= args.lthres:
                 lang_survived += 1
                 out.write("%s\n" % json.dumps(lang))
-
+            elif args.removed is not None:
+                fr.write("%s\n" % json.dumps(lang))
+    if args.removed is not None:
+        fr.close()
     sys.stderr.write("language thresholding: %d -> %d\n" % (lang_total, lang_survived))
 
 
