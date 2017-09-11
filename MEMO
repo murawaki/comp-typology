@@ -44,7 +44,7 @@
   % python format_wals/fthres.py --fthres=0.1 ../data/wals/langs_aug.json ../data/wals/flist_aug.json ../data/wals/langs_full.json ../data/wals/flist.json
 
 - Remove low-coverage languages (in terms of the number of features)
-  % python format_wals/lthres.py --lthres=0.3 ../data/wals/langs_full.json ../data/wals/flist.json ../data/wals/langs.json
+  % python format_wals/lthres.py --lthres=0.3 --removed ../data/wals/langs_removed.json ../data/wals/langs_full.json ../data/wals/flist.json ../data/wals/langs.json
 
 
 
@@ -162,3 +162,9 @@
   % python glottolog/merge.py ../data/langs.json ../data/glottolog/trees.pkl ../data/trees.json
 
   % python glottolog/merge.py --lthres=0.3 ../data/langs_full.json ../data/glottolog/trees.pkl ../data/trees_full.json
+
+
+
+* JSAI 2016 small experiment
+
+  % python format_wals/jsai2016.py ../data/wals/langs_all.json ../data/wals/flist_all.json
