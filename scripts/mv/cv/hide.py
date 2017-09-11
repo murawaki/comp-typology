@@ -3,7 +3,7 @@
 import sys, os
 import codecs
 import json
-import random
+import copy
 
 sys.path.insert(1, os.path.join(os.path.join(sys.path[0], os.path.pardir), os.path.pardir))
 from json_utils import load_json_file, load_json_stream
@@ -15,6 +15,7 @@ def main(src, dst, cvmap_file, cvn):
 
     wals_code2lang = {}
     for lang in langs:
+        lang["features_orig"] = copy.copy(lang["features"])
         wals_code2lang[lang["wals_code"]] = lang
 
     for wals_code, wals_id in cvmap[cvn]:
